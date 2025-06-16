@@ -3535,6 +3535,16 @@ static void ggml_backend_cuda_device_get_memory(ggml_backend_dev_t dev, size_t *
         }
         ggml_hip_mgmt_release();
     }
+#elif defined(GGML_USE_MUSA)
+    if (ggml_mtml_init() == 0) {
+        int status = ggml_mtml_get_device_memory(ctx->id.c_str(), free, total);
+        if (status == 0) {
+            GGML_LOG_DEBUG("%s utilizing MTML memory reporting free: %zu total: %zu\n", __func__, *free, *total);
+            ggml_mtml_release();
+            return;
+        }
+        ggml_mtml_release();
+    }
 #else
     if (ggml_nvml_init() == 0) {
         int status = ggml_nvml_get_device_memory(ctx->id.c_str(), free, total);
