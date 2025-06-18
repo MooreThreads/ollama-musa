@@ -248,11 +248,10 @@ check_gpu() {
             esac ;;
         dmidecode)
             case $2 in
-                mtgpu)  available dmidecode && $SUDO dmidecode | grep -q 'AB100' || return 1 ;;
+                mtgpu)  available dmidecode && $SUDO dmidecode | grep -iE 'AB100|M1000' || return 1 ;;
             esac ;;
-        nvidia-smi)   available nvidia-smi || return 1 ;;
-        mthreads-gmi) available mthreads-gmi || return 1 ;;
-        mthreads-smi) available mthreads-smi || return 1 ;;
+        nvidia-smi) available nvidia-smi || return 1 ;;
+        mthreads-*) available $1 || return 1 ;;
     esac
 }
 
