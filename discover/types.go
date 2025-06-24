@@ -182,7 +182,8 @@ func (l GpuInfoList) FlashAttentionSupported() bool {
 	for _, gpu := range l {
 		supportsFA := gpu.Library == "metal" ||
 			(gpu.Library == "cuda" && gpu.DriverMajor >= 7) ||
-			gpu.Library == "rocm"
+			gpu.Library == "rocm" ||
+			gpu.Library == "musa"
 
 		if !supportsFA {
 			return false
