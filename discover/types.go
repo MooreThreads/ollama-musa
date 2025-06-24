@@ -175,7 +175,7 @@ func (l GpuInfoList) FlashAttentionSupported() bool {
 		supportsFA := gpu.Library == "cpu" ||
 			gpu.Name == "Metal" || gpu.Library == "Metal" ||
 			(gpu.Library == "CUDA" && gpu.DriverMajor >= 7 && !(gpu.ComputeMajor == 7 && gpu.ComputeMinor == 2)) || // We don't have kernels for Jetson Xavier
-			gpu.Library == "ROCm"
+			gpu.Library == "ROCm" || gpu.Library == "MUSA"
 
 		if !supportsFA {
 			return false
