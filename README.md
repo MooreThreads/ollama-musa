@@ -4,6 +4,33 @@
   </a>
 </div>
 
+# Ollama MUSA (ollama-musa)
+
+[![Latest Release](https://img.shields.io/github/v/release/MooreThreads/ollama-musa?style=flat-square)](https://github.com/MooreThreads/ollama-musa/releases/latest)
+[![Docker Pulls](https://img.shields.io/docker/pulls/mthreads/ollama?style=flat-square)](https://hub.docker.com/r/mthreads/ollama)
+[![GitHub Stars](https://img.shields.io/github/stars/MooreThreads/ollama-musa?style=social)](https://github.com/MooreThreads/ollama-musa)
+
+**Ollama MUSA** is a fork of [Ollama](https://github.com/ollama/ollama) that enables support for running large language models (LLMs) on [Moore Threads](https://www.mthreads.com/) GPUs.
+It leverages the **MUSA** (**M**eta-computing **U**nified **S**ystem **A**rchitecture) platform to accelerate inference workloads.
+
+## Installation
+
+First, download the [MUSA SDK](https://developer.mthreads.com/sdk/download/musa?equipment=&os=&driverVersion=&version=4.2.0) and install the appropriate MTGPU driver.
+
+### Option 1: Install via Script
+
+```shell
+curl -fsSL https://raw.githubusercontent.com/MooreThreads/ollama-musa/refs/heads/main/scripts/install.sh | sh
+```
+
+### Option 2: Run with Docker
+
+Install the [MT Container Toolkit](https://developer.mthreads.com/sdk/download/CloudNative?equipment=&os=&driverVersion=&version=) (v2.0.0), and set the default runtime to `mthreads`.
+
+```bash
+docker run -d -v ollama:/root/.ollama -p 11434:11434 --name ollama mthreads/ollama:0.9.6-musa-rc4.2.0
+```
+
 # Ollama
 
 Get up and running with large language models.
@@ -406,7 +433,7 @@ See the [API documentation](./docs/api.md) for all endpoints.
 - [AppFlowy](https://github.com/AppFlowy-IO/AppFlowy) (AI collaborative workspace with Ollama, cross-platform and self-hostable)
 - [Lumina](https://github.com/cushydigit/lumina.git) (A lightweight, minimal React.js frontend for interacting with Ollama servers)
 - [Tiny Notepad](https://pypi.org/project/tiny-notepad) (A lightweight, notepad-like interface to chat with ollama available on PyPI)
-- [macLlama (macOS native)](https://github.com/hellotunamayo/macLlama) (A native macOS GUI application for interacting with Ollama models, featuring a chat interface.) 
+- [macLlama (macOS native)](https://github.com/hellotunamayo/macLlama) (A native macOS GUI application for interacting with Ollama models, featuring a chat interface.)
 - [GPTranslate](https://github.com/philberndt/GPTranslate) (A fast and lightweight, AI powered desktop translation application written with Rust and Tauri. Features real-time translation with OpenAI/Azure/Ollama.)
 - [ollama launcher](https://github.com/NGC13009/ollama-launcher) (A launcher for Ollama, aiming to provide users with convenient functions such as ollama server launching, management, or configuration.)
 - [ai-hub](https://github.com/Aj-Seven/ai-hub) (AI Hub supports multiple models via API keys and Chat support via Ollama API.)
