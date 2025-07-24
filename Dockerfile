@@ -6,7 +6,7 @@ ARG ROCMVERSION=6.3.3
 ARG JETPACK5VERSION=r35.4.1
 ARG JETPACK6VERSION=r36.4.0
 ARG CMAKEVERSION=3.31.2
-ARG MUSAVERSION=4.2.0
+ARG MUSAVERSION=rc4.2.0
 ARG UBUNTUVERSION=22.04
 
 # We require gcc v10 minimum.  v10.3 has regressions, so the rockylinux 8.5 AppStream has the latest compatible version
