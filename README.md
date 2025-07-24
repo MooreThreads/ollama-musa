@@ -6,8 +6,9 @@
 
 # Ollama MUSA (ollama-musa)
 
-[![Latest Release](https://img.shields.io/github/v/release/MooreThreads/ollama-musa?style=flat-square)](https://github.com/MooreThreads/ollama-musa/releases/latest)
-[![Docker Pulls](https://img.shields.io/docker/pulls/mthreads/ollama?style=flat-square)](https://hub.docker.com/r/mthreads/ollama)
+[![Latest Release](https://img.shields.io/github/v/release/MooreThreads/ollama-musa?style=flat-square&color=orange)](https://github.com/MooreThreads/ollama-musa/releases/latest)
+[![Docker Pulls](https://img.shields.io/docker/pulls/mthreads/ollama?style=flat-square&color=orange)](https://hub.docker.com/r/mthreads/ollama)
+[![GitHub License](https://img.shields.io/badge/License-Modified_MIT-orange.svg?style=flat-square)](https://github.com/MooreThreads/ollama-musa/blob/main/LICENSE)
 [![GitHub Stars](https://img.shields.io/github/stars/MooreThreads/ollama-musa?style=social)](https://github.com/MooreThreads/ollama-musa)
 
 
@@ -19,7 +20,7 @@ It leverages the **MUSA** (**M**eta-computing **U**nified **S**ystem **A**rchite
 
 ## 安装说明 / Installation
 
-请先下载安装 [MUSA SDK](https://developer.mthreads.com/sdk/download/musa?equipment=&os=&driverVersion=&version=4.2.0) 及对应的 MTGPU 驱动。
+请先下载安装 [MUSA SDK](https://developer.mthreads.com/sdk/download/musa?equipment=&os=&driverVersion=&version=4.2.0) 中对应的 MTGPU 驱动。
 
 First, download the [MUSA SDK](https://developer.mthreads.com/sdk/download/musa?equipment=&os=&driverVersion=&version=4.2.0) and install the appropriate MTGPU driver.
 
