@@ -18,7 +18,7 @@
 **Ollama MUSA** is a fork of [Ollama](https://github.com/ollama/ollama) that enables support for running large language models (LLMs) on [Moore Threads](https://www.mthreads.com/) GPUs.
 It leverages the **MUSA** (**M**eta-computing **U**nified **S**ystem **A**rchitecture) platform to accelerate inference workloads.
 
-## 安装说明 / Installation
+## 安装说明（Linux）/ Installation (Linux)
 
 请先下载安装 [MUSA SDK](https://developer.mthreads.com/sdk/download/musa?equipment=&os=&driverVersion=&version=4.2.0) 中对应的 MTGPU 驱动。
 
