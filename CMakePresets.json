@@ -65,6 +65,16 @@
       "cacheVariables": {
         "MUSA_ARCHITECTURES": "21;22;31"
       }
+    },
+    {
+      "name": "Vulkan",
+      "inherits": [ "Default" ]
+    },
+    {
+      "name": "Vulkan 1",
+      "inherits": [ "Vulkan" ],
+      "cacheVariables": {
+      }
     }
   ],
   "buildPresets": [
@@ -117,6 +127,16 @@
       "name": "MUSA 4",
       "inherits": [ "MUSA" ],
       "configurePreset": "MUSA 4"
+    },
+    {
+      "name": "Vulkan",
+      "configurePreset": "Vulkan",
+      "targets": [ "ggml-vulkan" ]
+    },
+    {
+      "name": "Vulkan 1",
+      "inherits": [ "Vulkan" ],
+      "configurePreset": "Vulkan 1"
     }
   ]
 }
