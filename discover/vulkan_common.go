@@ -3,6 +3,7 @@
 package discover
 
 import (
+	"fmt"
 	"log/slog"
 	"strings"
 )
@@ -21,5 +22,6 @@ func vulkanGetVisibleDevicesEnv(gpuInfo []GpuInfo) (string, string) {
 }
 
 func vulkanVariant(gpuInfo VulkanGPUInfo) string {
-	return "1"
+	slog.Info("yeahdongcn: vulkanVariant called", "gpuInfo", gpuInfo)
+	return fmt.Sprintf("v%d", gpuInfo.DriverMajor)
 }

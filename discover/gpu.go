@@ -640,12 +640,16 @@ func GetGPUInfo() GpuInfoList {
 				gpuInfo.DriverMinor = int(memInfo.minor)
 
 				variant := vulkanVariant(gpuInfo)
+				slog.Info("yeahdongcn", "variant", variant)
 				// Start with our bundled libraries
 				if variant != "" {
 					variantPath := filepath.Join(LibOllamaPath, "vulkan_"+variant)
 					if _, err := os.Stat(variantPath); err == nil {
+						slog.Info("yeahdongcn: vulkan variant path found", "path", variantPath)
 						// Put the variant directory first in the search path to avoid runtime linking to the wrong library
 						gpuInfo.DependencyPath = append([]string{variantPath}, gpuInfo.DependencyPath...)
+					} else {
+						slog.Info("yeahdongcn: vulkan variant path not found", "path", variantPath)
 					}
 				}
 				gpuInfo.Variant = variant

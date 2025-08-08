@@ -113,7 +113,6 @@ RUN --mount=type=cache,target=/root/.ccache \
     cmake --preset 'VULKAN 1' \
         && cmake --build --parallel --preset 'VULKAN 1' \
         && cmake --install build --component VULKAN --strip --parallel 8
-RUN ls -l dist/lib/ollama && ls -l dist/lib
 
 # Moore Threads (MUSA) build stages
 FROM mthreads/musa:${MUSAVERSION}-devel-ubuntu${UBUNTUVERSION}-amd64 AS musa-4
