@@ -610,46 +610,46 @@ func GetGPUInfo() GpuInfoList {
 			}
 		}
 
+		// Vulkan
+		vHandles = initVulkanHandles()
+		for i := range vHandles.deviceCount {
+			if vHandles.vulkan != nil {
+				gpuInfo := VulkanGPUInfo{
+					GpuInfo: GpuInfo{
+						Library: "vulkan",
+					},
+					index: i,
+				}
+
+				C.vk_check_vram(*vHandles.vulkan, C.int(i), &memInfo)
+				if memInfo.err != nil {
+					slog.Info("error looking up vulkan GPU memory", "error", C.GoString(memInfo.err))
+					C.free(unsafe.Pointer(memInfo.err))
+					continue
+				}
+
+				// gpuInfo.FlashAttention = (C.vk_check_flash_attention(*vHandles.vulkan, C.int(i)) == 0) // 0 means supported
+				gpuInfo.TotalMemory = uint64(memInfo.total)
+				gpuInfo.FreeMemory = uint64(memInfo.free)
+				gpuInfo.ID = C.GoString(&memInfo.gpu_id[0])
+				gpuInfo.Compute = fmt.Sprintf("%d.%d", memInfo.major, memInfo.minor)
+				gpuInfo.MinimumMemory = 0
+				gpuInfo.DependencyPath = []string{LibOllamaPath}
+				gpuInfo.Name = C.GoString(&memInfo.gpu_name[0])
+				gpuInfo.DriverMajor = int(memInfo.major)
+				gpuInfo.DriverMinor = int(memInfo.minor)
+
+				// TODO potentially sort on our own algorithm instead of what the underlying GPU library does...
+				vulkanGPUs = append(vulkanGPUs, gpuInfo)
+			}
+		}
+
 		bootstrapped = true
 		if len(cudaGPUs) == 0 && len(rocmGPUs) == 0 && len(oneapiGPUs) == 0 && len(musaGPUs) == 0 && len(vulkanGPUs) == 0 {
 			slog.Info("no compatible GPUs were discovered")
 		}
 
 		// TODO verify we have runners for the discovered GPUs, filter out any that aren't supported with good error messages
-	}
-
-	// Vulkan
-	vHandles = initVulkanHandles()
-	for i := range vHandles.deviceCount {
-		if vHandles.vulkan != nil {
-			gpuInfo := VulkanGPUInfo{
-				GpuInfo: GpuInfo{
-					Library: "vulkan",
-				},
-				index: i,
-			}
-
-			C.vk_check_vram(*vHandles.vulkan, C.int(i), &memInfo)
-			if memInfo.err != nil {
-				slog.Info("error looking up vulkan GPU memory", "error", C.GoString(memInfo.err))
-				C.free(unsafe.Pointer(memInfo.err))
-				continue
-			}
-
-			gpuInfo.FlashAttention = (C.vk_check_flash_attention(*vHandles.vulkan, C.int(i)) == 0) // 0 means supported
-			gpuInfo.TotalMemory = uint64(memInfo.total)
-			gpuInfo.FreeMemory = uint64(memInfo.free)
-			gpuInfo.ID = C.GoString(&memInfo.gpu_id[0])
-			gpuInfo.Compute = fmt.Sprintf("%d.%d", memInfo.major, memInfo.minor)
-			gpuInfo.MinimumMemory = 0
-			gpuInfo.DependencyPath = []string{LibOllamaPath}
-			gpuInfo.Name = C.GoString(&memInfo.gpu_name[0])
-			gpuInfo.DriverMajor = int(memInfo.major)
-			gpuInfo.DriverMinor = int(memInfo.minor)
-
-			// TODO potentially sort on our own algorithm instead of what the underlying GPU library does...
-			vulkanGPUs = append(vulkanGPUs, gpuInfo)
-		}
 	}
 
 	// For detected GPUs, load library if not loaded
@@ -1143,7 +1143,7 @@ func (l GpuInfoList) GetVisibleDevicesEnv() (string, string) {
 	case "musa":
 		return musaGetVisibleDevicesEnv(l)
 	case "vulkan":
-		return vkGetVisibleDevicesEnv(l)
+		return vulkanGetVisibleDevicesEnv(l)
 	default:
 		slog.Debug("no filter required for library " + l[0].Library)
 		return "", ""

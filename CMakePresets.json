@@ -67,12 +67,12 @@
       }
     },
     {
-      "name": "Vulkan",
+      "name": "VULKAN",
       "inherits": [ "Default" ]
     },
     {
-      "name": "Vulkan 1",
-      "inherits": [ "Vulkan" ],
+      "name": "VULKAN 1",
+      "inherits": [ "VULKAN" ],
       "cacheVariables": {
       }
     }
@@ -129,14 +129,14 @@
       "configurePreset": "MUSA 4"
     },
     {
-      "name": "Vulkan",
-      "configurePreset": "Vulkan",
+      "name": "VULKAN",
+      "configurePreset": "VULKAN",
       "targets": [ "ggml-vulkan" ]
     },
     {
-      "name": "Vulkan 1",
-      "inherits": [ "Vulkan" ],
-      "configurePreset": "Vulkan 1"
+      "name": "VULKAN 1",
+      "inherits": [ "VULKAN" ],
+      "configurePreset": "VULKAN 1"
     }
   ]
 }
