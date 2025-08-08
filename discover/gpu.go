@@ -634,10 +634,21 @@ func GetGPUInfo() GpuInfoList {
 				gpuInfo.ID = C.GoString(&memInfo.gpu_id[0])
 				gpuInfo.Compute = fmt.Sprintf("%d.%d", memInfo.major, memInfo.minor)
 				gpuInfo.MinimumMemory = 0
-				gpuInfo.DependencyPath = []string{LibOllamaPath}
+				// gpuInfo.DependencyPath = []string{LibOllamaPath}
 				gpuInfo.Name = C.GoString(&memInfo.gpu_name[0])
 				gpuInfo.DriverMajor = int(memInfo.major)
 				gpuInfo.DriverMinor = int(memInfo.minor)
+
+				variant := vulkanVariant(gpuInfo)
+				// Start with our bundled libraries
+				if variant != "" {
+					variantPath := filepath.Join(LibOllamaPath, "vulkan_"+variant)
+					if _, err := os.Stat(variantPath); err == nil {
+						// Put the variant directory first in the search path to avoid runtime linking to the wrong library
+						gpuInfo.DependencyPath = append([]string{variantPath}, gpuInfo.DependencyPath...)
+					}
+				}
+				gpuInfo.Variant = variant
 
 				// TODO potentially sort on our own algorithm instead of what the underlying GPU library does...
 				vulkanGPUs = append(vulkanGPUs, gpuInfo)

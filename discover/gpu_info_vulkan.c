@@ -225,11 +225,15 @@ void vk_check_vram(vk_handle_t rh, int i, mem_info_t *resp) {
   VkPhysicalDeviceProperties properties;
   (*rh.vkGetPhysicalDeviceProperties)(devices[i], &properties);
 
-  int supports_budget = is_extension_supported(&rh, devices[i], VK_EXT_MEMORY_BUDGET_EXTENSION_NAME);
-  if (!supports_budget) {
-    free(devices);
-    resp->err = strdup("device does not support memory budget");
-    return;
+  // int supports_budget = is_extension_supported(&rh, devices[i], VK_EXT_MEMORY_BUDGET_EXTENSION_NAME);
+  // if (!supports_budget) {
+  //   free(devices);
+  //   resp->err = strdup("device does not support memory budget");
+  //   return;
+  // }
+  if (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
+    printf("device is a GPU\n");
+    printf("device %d name: %s\n", i, properties.deviceName);
   }
 
   if (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU) {
