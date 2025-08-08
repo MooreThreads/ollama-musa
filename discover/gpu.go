@@ -44,6 +44,11 @@ type oneapiHandles struct {
 	deviceCount int
 }
 
+type vulkanHandles struct {
+	vulkan      *C.vk_handle_t
+	deviceCount int
+}
+
 const (
 	cudaMinimumMemory = 457 * format.MebiByte
 	rocmMinimumMemory = 457 * format.MebiByte
@@ -66,6 +71,9 @@ var (
 	mtmusaLibPath string
 	musartLibPath string
 	mtmlLibPath   string
+	vulkanGPUs    []VulkanGPUInfo
+	vulkanLibPath string
+	capLibPath    string
 
 	// If any discovered GPUs are incompatible, report why
 	unsupportedGPUs []UnsupportedGPUInfo
@@ -169,6 +177,29 @@ func initMusaHandles() *musaHandles {
 	}
 
 	return mHandles
+}
+
+// Note: gpuMutex must already be held
+func initVulkanHandles() *vulkanHandles {
+	vHandles := &vulkanHandles{}
+
+	// Short Circuit if we already know which library to use
+	if vulkanLibPath != "" && capLibPath != "" {
+		vHandles.deviceCount, vHandles.vulkan, _, _ = LoadVulkanMgmt([]string{vulkanLibPath}, []string{capLibPath})
+		return vHandles
+	}
+
+	libvulkanPaths := FindGPULibs(VulkanMgmtName, VulkanGlobs)
+	libcapPaths := FindGPULibs(CapMgmtName, CapGlobs)
+
+	if len(libvulkanPaths) > 0 && len(libcapPaths) > 0 {
+		slog.Info("vulkan: load libvulkan and libcap ok")
+		vHandles.deviceCount, vHandles.vulkan, vulkanLibPath, capLibPath = LoadVulkanMgmt(libvulkanPaths, libcapPaths)
+	} else {
+		slog.Info("vulkan: failed to load libvulkan or libcap")
+	}
+
+	return vHandles
 }
 
 // Note: gpuMutex must already be held
@@ -290,6 +321,7 @@ func GetGPUInfo() GpuInfoList {
 	var cHandles *cudaHandles
 	var oHandles *oneapiHandles
 	var mHandles *musaHandles
+	var vHandles *vulkanHandles
 	defer func() {
 		if cHandles != nil {
 			if cHandles.cudart != nil {
@@ -317,6 +349,11 @@ func GetGPUInfo() GpuInfoList {
 			}
 			if mHandles.mtml != nil {
 				C.mtml_release(*mHandles.mtml)
+			}
+		}
+		if vHandles != nil {
+			if vHandles.vulkan != nil {
+				C.vk_release(*vHandles.vulkan)
 			}
 		}
 	}()
@@ -573,8 +610,57 @@ func GetGPUInfo() GpuInfoList {
 			}
 		}
 
+		// Vulkan
+		vHandles = initVulkanHandles()
+		for i := range vHandles.deviceCount {
+			if vHandles.vulkan != nil {
+				gpuInfo := VulkanGPUInfo{
+					GpuInfo: GpuInfo{
+						Library: "vulkan",
+					},
+					index: i,
+				}
+
+				C.vk_check_vram(*vHandles.vulkan, C.int(i), &memInfo)
+				if memInfo.err != nil {
+					slog.Info("error looking up vulkan GPU memory", "error", C.GoString(memInfo.err))
+					C.free(unsafe.Pointer(memInfo.err))
+					continue
+				}
+
+				// gpuInfo.FlashAttention = (C.vk_check_flash_attention(*vHandles.vulkan, C.int(i)) == 0) // 0 means supported
+				gpuInfo.TotalMemory = uint64(memInfo.total)
+				gpuInfo.FreeMemory = uint64(memInfo.free)
+				gpuInfo.ID = C.GoString(&memInfo.gpu_id[0])
+				gpuInfo.Compute = fmt.Sprintf("%d.%d", memInfo.major, memInfo.minor)
+				gpuInfo.MinimumMemory = 0
+				// gpuInfo.DependencyPath = []string{LibOllamaPath}
+				gpuInfo.Name = C.GoString(&memInfo.gpu_name[0])
+				gpuInfo.DriverMajor = int(memInfo.major)
+				gpuInfo.DriverMinor = int(memInfo.minor)
+
+				variant := vulkanVariant(gpuInfo)
+				slog.Info("yeahdongcn", "variant", variant)
+				// Start with our bundled libraries
+				if variant != "" {
+					variantPath := filepath.Join(LibOllamaPath, "vulkan_"+variant)
+					if _, err := os.Stat(variantPath); err == nil {
+						slog.Info("yeahdongcn: vulkan variant path found", "path", variantPath)
+						// Put the variant directory first in the search path to avoid runtime linking to the wrong library
+						gpuInfo.DependencyPath = append([]string{variantPath}, gpuInfo.DependencyPath...)
+					} else {
+						slog.Info("yeahdongcn: vulkan variant path not found", "path", variantPath)
+					}
+				}
+				gpuInfo.Variant = variant
+
+				// TODO potentially sort on our own algorithm instead of what the underlying GPU library does...
+				vulkanGPUs = append(vulkanGPUs, gpuInfo)
+			}
+		}
+
 		bootstrapped = true
-		if len(cudaGPUs) == 0 && len(rocmGPUs) == 0 && len(oneapiGPUs) == 0 && len(musaGPUs) == 0 {
+		if len(cudaGPUs) == 0 && len(rocmGPUs) == 0 && len(oneapiGPUs) == 0 && len(musaGPUs) == 0 && len(vulkanGPUs) == 0 {
 			slog.Info("no compatible GPUs were discovered")
 		}
 
@@ -726,6 +812,22 @@ func GetGPUInfo() GpuInfoList {
 			)
 			musaGPUs[i].FreeMemory = uint64(memInfo.free)
 		}
+
+		if vHandles == nil && len(vulkanGPUs) > 0 {
+			vHandles = initVulkanHandles()
+		}
+		for i, gpu := range vulkanGPUs {
+			if vHandles.vulkan == nil {
+				// shouldn't happen
+				slog.Warn("nil vulkan handle with device count", "count", oHandles.deviceCount)
+				continue
+			}
+			C.vk_check_vram(*vHandles.vulkan, C.int(gpu.index), &memInfo)
+			// TODO - convert this to MinimumMemory based on testing...
+			var totalFreeMem float64 = float64(memInfo.free) * 0.95 // work-around: leave some reserve vram for mkl lib used in ggml-sycl backend.
+			memInfo.free = C.uint64_t(totalFreeMem)
+			vulkanGPUs[i].FreeMemory = uint64(memInfo.free)
+		}
 	}
 
 	resp := []GpuInfo{}
@@ -739,6 +841,9 @@ func GetGPUInfo() GpuInfoList {
 		resp = append(resp, gpu.GpuInfo)
 	}
 	for _, gpu := range musaGPUs {
+		resp = append(resp, gpu.GpuInfo)
+	}
+	for _, gpu := range vulkanGPUs {
 		resp = append(resp, gpu.GpuInfo)
 	}
 	if len(resp) == 0 {
@@ -1005,6 +1110,29 @@ func loadMTMLMgmt(mtmlLibPaths []string) (*C.mtml_handle_t, string, error) {
 	return nil, "", err
 }
 
+func LoadVulkanMgmt(vulkanLibPaths []string, capLibPaths []string) (int, *C.vk_handle_t, string, string) {
+	var resp C.vk_init_resp_t
+	resp.ch.verbose = getVerboseState()
+	for _, vkLibPath := range vulkanLibPaths {
+		for _, capLibPath := range capLibPaths {
+			vkLib := C.CString(vkLibPath)
+			capLib := C.CString(capLibPath)
+			defer C.free(unsafe.Pointer(vkLib))
+			defer C.free(unsafe.Pointer(capLib))
+
+			C.vk_init(vkLib, capLib, &resp)
+			if resp.err != nil {
+				slog.Error("Unable to load vulkan", "library", vkLibPath, capLibPath, "error", C.GoString(resp.err))
+				C.free(unsafe.Pointer(resp.err))
+			} else {
+				return int(resp.num_devices), &resp.ch, vkLibPath, capLibPath
+			}
+		}
+	}
+
+	return 0, nil, "", ""
+}
+
 func getVerboseState() C.uint16_t {
 	if envconfig.LogLevel() < slog.LevelInfo {
 		return C.uint16_t(1)
@@ -1029,6 +1157,8 @@ func (l GpuInfoList) GetVisibleDevicesEnv() (string, string) {
 		return oneapiGetVisibleDevicesEnv(l)
 	case "musa":
 		return musaGetVisibleDevicesEnv(l)
+	case "vulkan":
+		return vulkanGetVisibleDevicesEnv(l)
 	default:
 		slog.Debug("no filter required for library " + l[0].Library)
 		return "", ""

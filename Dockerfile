@@ -22,13 +22,13 @@ ENV PATH=/opt/rh/gcc-toolset-10/root/usr/bin:$PATH
 FROM --platform=linux/arm64 almalinux:8 AS base-arm64
 # install epel-release for ccache
 RUN yum install -y yum-utils epel-release \
-    && dnf install -y clang ccache \
+    && dnf install -y clang ccache libcap-devel vulkan-headers \
     && yum-config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel8/sbsa/cuda-rhel8.repo
 ENV CC=clang CXX=clang++
 
 FROM base-${TARGETARCH} AS base
 ARG CMAKEVERSION
-RUN curl -fsSL https://github.com/Kitware/CMake/releases/download/v${CMAKEVERSION}/cmake-${CMAKEVERSION}-linux-$(uname -m).tar.gz | tar xz -C /usr/local --strip-components 1
+RUN curl -fsSL https://cmake.org/files/v${CMAKEVERSION%.*}/cmake-${CMAKEVERSION}-linux-$(uname -m).tar.gz | tar xz -C /usr/local --strip-components 1
 COPY CMakeLists.txt CMakePresets.json .
 COPY ml/backend/ggml/ggml ml/backend/ggml/ggml
 ENV LDFLAGS=-s
@@ -103,6 +103,17 @@ COPY --from=jetpack-6 dist/lib/ollama /lib/ollama/cuda_jetpack6
 FROM scratch AS rocm
 COPY --from=rocm-6 dist/lib/ollama /lib/ollama
 
+FROM sh-harbor.mthreads.com/haive/mthreads/vulkan-sdk:latest-arm64 AS vulkan-1
+ARG CMAKEVERSION
+RUN curl -fsSL https://cmake.org/files/v${CMAKEVERSION%.*}/cmake-${CMAKEVERSION}-linux-$(uname -m).tar.gz | tar xz -C /usr/local --strip-components 1
+COPY CMakeLists.txt CMakePresets.json .
+COPY ml/backend/ggml/ggml ml/backend/ggml/ggml
+ENV LDFLAGS=-s
+RUN --mount=type=cache,target=/root/.ccache \
+    cmake --preset 'VULKAN 1' \
+        && cmake --build --parallel --preset 'VULKAN 1' \
+        && cmake --install build --component VULKAN --strip --parallel 8
+
 # Moore Threads (MUSA) build stages
 FROM mthreads/musa:${MUSAVERSION}-devel-ubuntu${UBUNTUVERSION}-amd64 AS musa-4
 RUN apt-get update \
@@ -110,7 +121,7 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 ARG CMAKEVERSION
-RUN curl -fsSL https://github.com/Kitware/CMake/releases/download/v${CMAKEVERSION}/cmake-${CMAKEVERSION}-linux-$(uname -m).tar.gz | tar xz -C /usr/local --strip-components 1
+RUN curl -fsSL https://cmake.org/files/v${CMAKEVERSION%.*}/cmake-${CMAKEVERSION}-linux-$(uname -m).tar.gz | tar xz -C /usr/local --strip-components 1
 COPY CMakeLists.txt CMakePresets.json .
 COPY ml/backend/ggml/ggml ml/backend/ggml/ggml
 ENV LDFLAGS=-s
@@ -129,6 +140,9 @@ RUN cd dist/lib/ollama/musa_v4 && \
 
 FROM scratch AS musa
 COPY --from=musa-4 dist/lib/ollama/musa_v4 /lib/ollama/musa_v4
+
+FROM scratch AS vulkan
+COPY --from=vulkan-1 dist/lib/ollama/vulkan_v1 /lib/ollama/vulkan_v1
 
 FROM ${FLAVOR} AS archive
 COPY --from=cpu dist/lib/ollama /lib/ollama
