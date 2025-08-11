@@ -203,6 +203,7 @@ func initVulkanHandles() *vulkanHandles {
 			bootstrapErrors = append(bootstrapErrors, err)
 		}
 	}
+
 	return vHandles
 }
 

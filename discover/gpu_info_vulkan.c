@@ -1,7 +1,8 @@
-#include "gpu_info_vulkan.h"
+#ifndef __APPLE__
 
 #include <string.h>
 #include <stdbool.h>
+#include "gpu_info_vulkan.h"
 
 // Compatibility macros for older Vulkan versions
 #ifndef VK_API_VERSION_MAJOR
@@ -183,3 +184,5 @@ void vk_release(vk_handle_t rh) {
   UNLOAD_LIBRARY(rh.vk_handle);
   rh.vk_handle = NULL;
 }
+
+#endif // __APPLE__
