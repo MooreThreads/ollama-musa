@@ -33,6 +33,6 @@ for FLAVOR in $FLAVORS; do
         ${OLLAMA_COMMON_BUILD_ARGS} \
         --build-arg FLAVOR=${FLAVOR} \
         -f Dockerfile \
-        -t ${FINAL_IMAGE_REPO}:$VERSION-${FLAVOR} \
+        -t ${FINAL_IMAGE_REPO}:$VERSION-${FLAVOR}-$(basename ${PLATFORM}) \
         .
 done
