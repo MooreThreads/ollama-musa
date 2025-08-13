@@ -843,7 +843,7 @@ func GetGPUInfo() GpuInfoList {
 	for _, gpu := range oneapiGPUs {
 		resp = append(resp, gpu.GpuInfo)
 	}
-	flavor := os.Getenv("FLAVOR")
+	flavor := os.Getenv("OLLAMA_FLAVOR")
 	if flavor == "vulkan" {
 		for _, gpu := range vulkanGPUs {
 			resp = append(resp, gpu.GpuInfo)

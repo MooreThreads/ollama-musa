@@ -155,7 +155,7 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 ARG FLAVOR
-ENV FLAVOR=$FLAVOR
+ENV OLLAMA_FLAVOR=$FLAVOR
 RUN if [ "$FLAVOR" = "musa" ]; then \
     apt-get update \
     && apt-get install -y libelf1 libnuma1 \
