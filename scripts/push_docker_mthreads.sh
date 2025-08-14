@@ -1,15 +1,18 @@
 #!/bin/sh
 
-set -eux
+set -eu
 
-. "$(dirname "$0")/env.sh"
+. $(dirname $0)/env.sh
+
 for FLAVOR in $FLAVORS; do
+    MANIFEST_TAG="${FINAL_IMAGE_REPO}:${VERSION}-${FLAVOR}"
     case "$FLAVOR" in
         musa)
             if [ "$PLATFORM" = "linux/amd64" ]; then
                 MUSAVERSION="rc4.2.0"
-                BASE_TAG="${FINAL_IMAGE_REPO}:${VERSION}-${FLAVOR}-$(basename "${PLATFORM}")"
-                VERSIONED_TAG="${FINAL_IMAGE_REPO}:${VERSION}-${FLAVOR}-${MUSAVERSION}-$(basename "${PLATFORM}")"
+                ARCH=$(basename "${PLATFORM}")
+                BASE_TAG="${MANIFEST_TAG}-${ARCH}"
+                VERSIONED_TAG="${MANIFEST_TAG}-${MUSAVERSION}-${ARCH}"
                 LATEST_TAG="${FINAL_IMAGE_REPO}:latest"
 
                 docker tag "$BASE_TAG" "$VERSIONED_TAG"
@@ -23,7 +26,6 @@ for FLAVOR in $FLAVORS; do
             fi
             ;;
         vulkan)
-            MANIFEST_TAG="${FINAL_IMAGE_REPO}:${VERSION}-${FLAVOR}"
             if [ "$PLATFORM" = "linux/arm64,linux/amd64" ]; then
                 AMD64_TAG="${MANIFEST_TAG}-amd64"
                 ARM64_TAG="${MANIFEST_TAG}-arm64"
@@ -32,7 +34,9 @@ for FLAVOR in $FLAVORS; do
                 docker manifest create "$MANIFEST_TAG" "$AMD64_TAG" "$ARM64_TAG"
                 docker manifest push "$MANIFEST_TAG"
             else
-                TAG="${MANIFEST_TAG}-$(basename "${PLATFORM}")"
+                ARCH=$(basename "${PLATFORM}")
+                TAG="${MANIFEST_TAG}-${ARCH}"
+
                 docker push "$TAG"
             fi
             ;;
