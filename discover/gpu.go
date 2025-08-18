@@ -67,6 +67,9 @@ func devInfoToInfoList(devs []ml.DeviceInfo) GpuInfoList {
 		if dev.Library == "CUDA" || dev.Library == "ROCm" {
 			info.MinimumMemory = 457 * format.MebiByte
 		}
+		if dev.Library == "MUSA" || dev.Library == "Vulkan" {
+			info.MinimumMemory = 518 * format.MebiByte
+		}
 		if dev.Library == "ROCm" && rocmDir != "" {
 			info.DependencyPath = append(info.DependencyPath, rocmDir)
 		}
