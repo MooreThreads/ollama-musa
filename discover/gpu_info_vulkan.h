@@ -7,16 +7,16 @@
 // Just enough typedef's to dlopen/dlsym for memory information
 #define VK_MAKE_API_VERSION(variant, major, minor, patch) \
     ((((uint32_t)(variant)) << 29) | (((uint32_t)(major)) << 22) | (((uint32_t)(minor)) << 12) | ((uint32_t)(patch)))
-#define VK_API_VERSION_1_2                VK_MAKE_API_VERSION(0, 1, 2, 0)
-#define VK_API_VERSION_MAJOR(version)     (((uint32_t)(version) >> 22U) & 0x7FU)
-#define VK_API_VERSION_MINOR(version)     (((uint32_t)(version) >> 12U) & 0x3FFU)
-#define VK_API_VERSION_PATCH(version)     ((uint32_t)(version) & 0xFFFU)
-#define VK_DEFINE_HANDLE(object)          typedef struct object##_T* object;
-#define VK_MAX_PHYSICAL_DEVICE_NAME_SIZE  256U
-#define VK_UUID_SIZE                      16U
-#define VK_MAX_EXTENSION_NAME_SIZE        256U
-#define VK_MAX_MEMORY_TYPES               32U
-#define VK_MAX_MEMORY_HEAPS               16U
+#define VK_API_VERSION_1_2                  VK_MAKE_API_VERSION(0, 1, 2, 0)
+#define VK_API_VERSION_MAJOR(version)       (((uint32_t)(version) >> 22U) & 0x7FU)
+#define VK_API_VERSION_MINOR(version)       (((uint32_t)(version) >> 12U) & 0x3FFU)
+#define VK_API_VERSION_PATCH(version)       ((uint32_t)(version) & 0xFFFU)
+#define VK_DEFINE_HANDLE(object)            typedef struct object##_T* object;
+#define VK_MAX_PHYSICAL_DEVICE_NAME_SIZE    256U
+#define VK_UUID_SIZE                        16U
+#define VK_MAX_EXTENSION_NAME_SIZE          256U
+#define VK_MAX_MEMORY_TYPES                 32U
+#define VK_MAX_MEMORY_HEAPS                 16U
 #define VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME \
     "VK_KHR_get_physical_device_properties2"
 #define VKAPI_PTR
