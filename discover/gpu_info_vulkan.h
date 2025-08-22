@@ -207,12 +207,7 @@ typedef struct VkPhysicalDeviceLimits {
 } VkPhysicalDeviceLimits;
 
 typedef enum VkPhysicalDeviceType {
-    // VK_PHYSICAL_DEVICE_TYPE_OTHER = 0,
-    // VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU = 1,
-    // VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU = 2,
-    // VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU = 3,
     VK_PHYSICAL_DEVICE_TYPE_CPU = 4
-    // VK_PHYSICAL_DEVICE_TYPE_MAX_ENUM = 0x7FFFFFFF
 } VkPhysicalDeviceType;
 
 typedef struct VkPhysicalDeviceSparseProperties {
@@ -224,9 +219,14 @@ typedef struct VkPhysicalDeviceSparseProperties {
 } VkPhysicalDeviceSparseProperties;
 typedef struct VkPhysicalDeviceProperties {
     uint32_t                            apiVersion;
+    uint32_t                            driverVersion;
+    uint32_t                            vendorID;
+    uint32_t                            deviceID;
     VkPhysicalDeviceType                deviceType;
     char                                deviceName[VK_MAX_PHYSICAL_DEVICE_NAME_SIZE];
     uint8_t                             pipelineCacheUUID[VK_UUID_SIZE];
+    VkPhysicalDeviceLimits              limits;
+    VkPhysicalDeviceSparseProperties    sparseProperties;
 } VkPhysicalDeviceProperties;
 
 typedef struct VkExtensionProperties {
@@ -269,6 +269,7 @@ typedef struct VkInstanceCreateInfo {
     uint32_t                    enabledExtensionCount;
     const char* const*          ppEnabledExtensionNames;
 } VkInstanceCreateInfo;
+
 
 typedef enum VkSystemAllocationScope {
     VK_SYSTEM_ALLOCATION_SCOPE_COMMAND = 0,
