@@ -10,6 +10,8 @@ PLATFORM=linux/amd64 DOCKER_ORG=mthreads FLAVORS=vulkan ./scripts/build_docker.s
 PLATFORM=linux/arm64 DOCKER_ORG=mthreads FLAVORS=vulkan ./scripts/build_docker.sh
 ```
 
+> *📝 The `UBUNTUVERSION` build argument specifies the Ubuntu version (e.g., `22.04`, `23.04`, `24.04`, `25.04`) used as the base image for Docker containers. This argument is only applicable when building images with the `vulkan` flavor.*
+
 After running the build commands, Docker images will be created with tags in the following format:
 
 ```bash
