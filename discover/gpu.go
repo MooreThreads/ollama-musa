@@ -847,6 +847,7 @@ func GetGPUInfo() GpuInfoList {
 	for _, gpu := range oneapiGPUs {
 		resp = append(resp, gpu.GpuInfo)
 	}
+	// XXX: Re-order GPU info based on the selected flavor
 	flavor := os.Getenv("OLLAMA_FLAVOR")
 	if flavor == "vulkan" {
 		for _, gpu := range vulkanGPUs {
