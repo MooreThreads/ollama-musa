@@ -8,6 +8,7 @@ import (
 	"io"
 	"log/slog"
 	"math"
+	"os"
 	"slices"
 	"strings"
 
@@ -897,9 +898,14 @@ func (f GGML) SupportsFlashAttention() bool {
 
 // FlashAttention checks if the model should enable flash attention
 func (f GGML) FlashAttention() bool {
-	return slices.Contains([]string{
-		"gptoss", "gpt-oss",
-	}, f.KV().String("general.architecture"))
+	// XXX: Enabling Flash Attention (FA) may reduce performance on MUSA.
+	flavor := os.Getenv("OLLAMA_FLAVOR")
+	if flavor == "vulkan" {
+		return slices.Contains([]string{
+			"gptoss", "gpt-oss",
+		}, f.KV().String("general.architecture"))
+	}
+	return false
 }
 
 // kvCacheBytesPerElement returns the number of bytes per element for a given KV cache type
