@@ -7,7 +7,7 @@ ARG ROCMVERSION=6.3.3
 ARG JETPACK5VERSION=r35.4.1
 ARG JETPACK6VERSION=r36.4.0
 ARG CMAKEVERSION=3.31.2
-ARG MUSAVERSION=rc4.2.0
+ARG MUSAVERSION=rc4.3.0
 ARG UBUNTUVERSION=22.04
 ARG VULKANVERSION=1.4.321.1
 
@@ -164,14 +164,6 @@ RUN --mount=type=cache,target=/root/.ccache \
     cmake --preset 'MUSA 4' \
         && cmake --build --parallel --preset 'MUSA 4' \
         && cmake --install build --component MUSA --strip --parallel 8
-# TODO: Remove the following lines in next release
-RUN cd dist/lib/ollama/musa_v4 && \
-    for f in libmusa.so.*; do \
-        if [ -f "$f" ] && [[ "$f" =~ ^libmusa\.so\.[0-9]+$ ]]; then \
-            ln -sf "$f" libmusa.so; \
-            break; \
-        fi; \
-    done
 
 FROM scratch AS musa
 COPY --from=musa-4 dist/lib/ollama/musa_v4 /lib/ollama/musa_v4

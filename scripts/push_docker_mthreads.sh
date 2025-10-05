@@ -10,7 +10,7 @@ for FLAVOR in $FLAVORS; do
     case "$FLAVOR" in
         musa)
             if [ "$PLATFORM" = "linux/amd64" ]; then
-                MUSAVERSION="rc4.2.0"
+                MUSAVERSION="rc4.3.0"
                 BASE_TAG="${MANIFEST_TAG}-${ARCH}"
                 VERSIONED_TAG="${MANIFEST_TAG}-${MUSAVERSION}-${ARCH}"
                 LATEST_TAG="${FINAL_IMAGE_REPO}:latest"
