@@ -7,7 +7,7 @@ ARG ROCMVERSION=6.3.3
 ARG JETPACK5VERSION=r35.4.1
 ARG JETPACK6VERSION=r36.4.0
 ARG CMAKEVERSION=3.31.2
-ARG MUSAVERSION=20250826
+ARG MUSAVERSION=rc4.3.0
 ARG UBUNTUVERSION=22.04
 ARG VULKANVERSION=1.4.321.1
 
@@ -150,7 +150,7 @@ RUN --mount=type=cache,target=/root/.ccache \
         && cmake --install build --component VULKAN --strip --parallel 8
 
 # Moore Threads (MUSA) build stages
-FROM sh-harbor.mthreads.com/haive/mthreads/musa:${MUSAVERSION}-devel-ubuntu${UBUNTUVERSION}-amd64 AS musa-4
+FROM mthreads/musa:${MUSAVERSION}-devel-ubuntu${UBUNTUVERSION}-amd64 AS musa-4
 RUN apt-get update \
     && apt-get install -y curl \
     && apt-get clean \
