@@ -146,7 +146,7 @@ COPY CMakeLists.txt CMakePresets.json .
 COPY ml/backend/ggml/ggml ml/backend/ggml/ggml
 ENV LDFLAGS=-s
 RUN --mount=type=cache,target=/root/.ccache \
-    cmake --preset 'VULKAN 1' \
+    cmake --preset 'VULKAN 1' -DOLLAMA_RUNNER_DIR="vulkan" \
         && cmake --build --parallel --preset 'VULKAN 1' \
         && cmake --install build --component VULKAN --strip --parallel 8
 
@@ -162,15 +162,15 @@ COPY CMakeLists.txt CMakePresets.json .
 COPY ml/backend/ggml/ggml ml/backend/ggml/ggml
 ENV LDFLAGS=-s
 RUN --mount=type=cache,target=/root/.ccache \
-    cmake --preset 'MUSA 4' \
+    cmake --preset 'MUSA 4' -DOLLAMA_RUNNER_DIR="musa" \
         && cmake --build --parallel --preset 'MUSA 4' \
         && cmake --install build --component MUSA --strip --parallel 8
 
 FROM scratch AS musa
-COPY --from=musa-4 dist/lib/ollama/musa_v4 /lib/ollama/musa_v4
+COPY --from=musa-4 dist/lib/ollama /lib/ollama
 
 FROM scratch AS vulkan
-COPY --from=vulkan-1 dist/lib/ollama/vulkan_v1 /lib/ollama/vulkan_v1
+COPY --from=vulkan-1 dist/lib/ollama /lib/ollama
 
 FROM ${FLAVOR} AS archive
 COPY --from=cpu dist/lib/ollama /lib/ollama
