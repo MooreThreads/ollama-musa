@@ -137,6 +137,10 @@ func GPUDevices(ctx context.Context, runners []FilteredRunnerDiscovery) []ml.Dev
 					} else {
 						envVar = "ROCR_VISIBLE_DEVICES"
 					}
+				} else if devices[i].Library == "MUSA" {
+					envVar = "MUSA_VISIBLE_DEVICES"
+				} else if devices[i].Library == "Vulkan" {
+					envVar = "GGML_VK_VISIBLE_DEVICES"
 				} else {
 					envVar = "CUDA_VISIBLE_DEVICES"
 				}
